@@ -128,3 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 db_cred.yml
+.idea/workspace.xml
+.idea/vcs.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/forest-team-gedi-etl.iml
