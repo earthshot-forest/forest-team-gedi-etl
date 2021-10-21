@@ -2,7 +2,7 @@ from pyGEDI import *
 from gedi_utils import *
 
 
-def get_download_links(products: list, version: str, bbox: dict) -> list:
+def get_download_links(products: list, version: str, bbox: dict) -> dict:
     download_links_dict = {}
     for product in products:
         download_links_dict[product] = get_gedi_download_links(product, version, bbox)
