@@ -4,8 +4,8 @@ import h5py
 import numpy as np
 import pandas as pd
 import geopandas
-from shapely.geometry import Point
-from datetime import date
+from shapely.geometry import MultiPolygon, Point, Polygon, box
+import datetime as dt
 from sqlalchemy import create_engine
 import sys
 import requests
@@ -49,6 +49,103 @@ def download_gedi(url, outdir, fileName, session):
     sys.stdout.write('\n')
     print(f"    {fileName} download complete.")
 
+def get_4b_gedi_download_links(bbox):
+    """Given a bounding box, get the download urls for GEDI level 4b data.
+    This code was adapted from NASA's tutorial - https://github.com/ornldaac/gedi_tutorials/blob/main/1_gedi_l4a_search_download.ipynb
+    It currently returns all data, but could take in a date range to only get data collected from that range. It could also be altered to
+    take in a polygon instead of a bbox.
+    """
+    doi = '10.3334/ORNLDAAC/1907'# GEDI L4A DOI 
+    cmrurl='https://cmr.earthdata.nasa.gov/search/' # CMR API base url 
+    doisearch = cmrurl + 'collections.json?doi=' + doi
+    concept_id = requests.get(doisearch).json()['feed']['entry'][0]['id'] # NASA EarthData's unique ID for 4b dataset
+
+    #There is a way to get files by polygon, but sticking with a rectangle for now.
+    # bound = (bbox['lr_lon'], bbox['ul_lat'], bbox['ul_lon'], bbox['lr_lat']) #Western, Southern, Eastern, Northern extentes of the AOI 
+    bound = (float(bbox[3]), float(bbox[0]), float(bbox[1]), float(bbox[2])) #Western, Southern, Eastern, Northern extentes of the AOI 
+
+    # time bound
+    start_date = dt.datetime(1999, 1, 1)
+    end_date = dt.datetime(2050, 1, 31)
+    # CMR formatted start and end times
+    dt_format = '%Y-%m-%dT%H:%M:%SZ'
+    temporal_str = start_date.strftime(dt_format) + ',' + end_date.strftime(dt_format)
+
+    # CMR formatted bounding box
+    bound_str = ','.join(map(str, bound))
+
+    page_num = 1
+    page_size = 2000 # CMR page size limit
+
+    granule_arr = []
+
+    while True:
+        
+        # defining parameters
+        cmr_param = {
+            "collection_concept_id": concept_id, 
+            "page_size": page_size,
+            "page_num": page_num,
+            "temporal": temporal_str,
+            "bounding_box[]": bound_str
+        }
+        
+        granulesearch = cmrurl + 'granules.json'
+
+        response = requests.get(granulesearch, params=cmr_param)
+        granules = response.json()['feed']['entry']
+        
+        if granules:
+            for g in granules:
+                granule_url = ''
+                granule_poly = ''
+                
+                # read file size
+                granule_size = float(g['granule_size'])
+                
+                # reading bounding geometries
+                if 'polygons' in g:
+                    polygons= g['polygons']
+                    multipolygons = []
+                    for poly in polygons:
+                        i=iter(poly[0].split (" "))
+                        ltln = list(map(" ".join,zip(i,i)))
+                        multipolygons.append(Polygon([[float(p.split(" ")[1]), float(p.split(" ")[0])] for p in ltln]))
+                    granule_poly = MultiPolygon(multipolygons)
+                
+                # Get URL to HDF5 files
+                for links in g['links']:
+                    if 'title' in links and links['title'].startswith('Download') \
+                    and links['title'].endswith('.h5'):
+                        granule_url = links['href']
+                granule_arr.append([granule_url, granule_size, granule_poly])
+                
+            page_num += 1
+        else: 
+            break
+
+    # adding bound as the last row into the dataframe
+    # we will use this later in the plot
+    b = list(bound)
+    granule_arr.append(['bound', 0, box(b[0], b[1], b[2], b[3])]) 
+
+    # creating a pandas dataframe
+    l4adf = pd.DataFrame(granule_arr, columns=["granule_url", "granule_size", "granule_poly"])
+
+    # Drop granules with empty geometry
+    l4adf = l4adf[l4adf['granule_poly'] != '']
+
+    print ("4b - Total granules found: ", len(l4adf.index)-1)
+    print ("4b - Total file size (MB): ", l4adf['granule_size'].sum())
+
+    # print(l4adf.head())
+
+    urls = []
+    for index, row in l4adf.iterrows():
+        urls.append(row['granule_url'])
+        print(row['granule_url'])
+    
+    return urls
 
 def get_gedi_download_links(product, version, bbox):
     """Get a list of download links that intersect an AOI from the GEDI Finder web service.
@@ -57,6 +154,9 @@ def get_gedi_download_links(product, version, bbox):
     :param bbox: An area of interest as an array containing the upper left lat, upper left long, lower right lat and lower right long coordinates -
      [ul_lat,ul_lon,lr_lat,lr_lon]
     """
+    if product == 'GEDI_I04_B':
+        return get_4b_gedi_download_links(bbox)
+
     bboxStr = bbox[0] + ',' + bbox[1] + ',' + bbox[2] + ',' + bbox[3]
     url = 'https://lpdaacsvc.cr.usgs.gov/services/gedifinder?product=' + product + '&version=' + str(
         version) + '&bbox=' + bboxStr + '&output=json'
