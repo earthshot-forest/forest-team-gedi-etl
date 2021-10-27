@@ -57,7 +57,7 @@ def get_gedi_download_links(product, version, bbox):
     :param bbox: An area of interest as an array containing the upper left lat, upper left long, lower right lat and lower right long coordinates -
      [ul_lat,ul_lon,lr_lat,lr_lon]
     """
-    bboxStr = bbox[0] + ',' + bbox[1] + ',' + bbox[2] + ',' + bbox[3]
+    bboxStr = bbox['ul_lat'] + ',' + bbox['ul_lon'] + ',' + bbox['lr_lat'] + ',' + bbox['lr_lon']
     url = 'https://lpdaacsvc.cr.usgs.gov/services/gedifinder?product=' + product + '&version=' + str(
         version) + '&bbox=' + bboxStr + '&output=json'
 
