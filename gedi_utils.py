@@ -49,8 +49,8 @@ def download_gedi(url, outdir, fileName, session):
     sys.stdout.write('\n')
     print(f"    {fileName} download complete.")
 
-def get_4b_gedi_download_links(bbox):
-    """Given a bounding box, get the download urls for GEDI level 4b data.
+def get_4a_gedi_download_links(bbox):
+    """Given a bounding box, get the download urls for GEDI level 4a data.
     This code was adapted from NASA's tutorial - https://github.com/ornldaac/gedi_tutorials/blob/main/1_gedi_l4a_search_download.ipynb
     It currently returns all data, but could take in a date range to only get data collected from that range. It could also be altered to
     take in a polygon instead of a bbox.
@@ -58,7 +58,7 @@ def get_4b_gedi_download_links(bbox):
     doi = '10.3334/ORNLDAAC/1907'# GEDI L4A DOI 
     cmrurl='https://cmr.earthdata.nasa.gov/search/' # CMR API base url 
     doisearch = cmrurl + 'collections.json?doi=' + doi
-    concept_id = requests.get(doisearch).json()['feed']['entry'][0]['id'] # NASA EarthData's unique ID for 4b dataset
+    concept_id = requests.get(doisearch).json()['feed']['entry'][0]['id'] # NASA EarthData's unique ID for 4a dataset
 
     #There is a way to get files by polygon, but sticking with a rectangle for now.
     # bound = (bbox['lr_lon'], bbox['ul_lat'], bbox['ul_lon'], bbox['lr_lat']) #Western, Southern, Eastern, Northern extentes of the AOI 
@@ -135,8 +135,8 @@ def get_4b_gedi_download_links(bbox):
     # Drop granules with empty geometry
     l4adf = l4adf[l4adf['granule_poly'] != '']
 
-    print ("4b - Total granules found: ", len(l4adf.index)-1)
-    print ("4b - Total file size (MB): ", l4adf['granule_size'].sum())
+    print ("4a - Total granules found: ", len(l4adf.index)-1)
+    print ("4a - Total file size (MB): ", l4adf['granule_size'].sum())
 
     # print(l4adf.head())
 
@@ -149,13 +149,13 @@ def get_4b_gedi_download_links(bbox):
 
 def get_gedi_download_links(product, version, bbox):
     """Get a list of download links that intersect an AOI from the GEDI Finder web service.
-    :param product: The GEDI product. Options - 1B, 2A, or 2B
+    :param product: The GEDI product. Options - 1B, 2A, 2B, or 4A
     :param version: The GEDI production version. Option - 001
     :param bbox: An area of interest as an array containing the upper left lat, upper left long, lower right lat and lower right long coordinates -
      [ul_lat,ul_lon,lr_lat,lr_lon]
     """
-    if product == 'GEDI_I04_B':
-        return get_4b_gedi_download_links(bbox)
+    if product == 'GEDI_I04_A':
+        return get_4a_gedi_download_links(bbox)
 
     bboxStr = bbox[0] + ',' + bbox[1] + ',' + bbox[2] + ',' + bbox[3]
     url = 'https://lpdaacsvc.cr.usgs.gov/services/gedifinder?product=' + product + '&version=' + str(
@@ -334,7 +334,7 @@ def format_bbox_as_list(bbox_dict: dict) -> list:
 def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
     with tempfile.NamedTemporaryFile() as temp:
         fileNameh5 = re.search("GEDI\d{2}_\D_.*", dl_url).group(0).replace(".h5", "")
-        filePathH5 = f'{temp.name}/{fileNameh5}.h5'
+        filePathH5 = f'{temp.name}{fileNameh5}.h5'
 
         session = sessionNASA(credentials['username'], credentials['password'])
         download_gedi(dl_url, temp.name, fileNameh5, session)
