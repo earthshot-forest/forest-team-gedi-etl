@@ -23,7 +23,7 @@ def download_gedi(url, outdir, fileName, session):
     try:
         os.makedirs(outdir)
     except OSError:
-        print(f"    WANRING - Creation of the subdirectory {outdir} failed or already exists")
+        print(f"    WARNING - Creation of the subdirectory {outdir} failed or already exists")
     else:
         print(f"    Created the subdirectory {outdir}")
 
@@ -32,6 +32,7 @@ def download_gedi(url, outdir, fileName, session):
     with open(path, 'wb') as f:
         response = session.get(url, stream=True)
         total = response.headers.get('content-length')
+        print(session)
         if total is None:
             f.write(response.content)
         else:
@@ -120,8 +121,9 @@ def get_aoi_x_y_index(data, bbox, lat_column, lon_column):
     lon = np.array(data[lon_column][()])
     np.nan_to_num(lat, nan=0)
     np.nan_to_num(lon, nan=0)
-    lat_filter = np.where((lat<bbox[2]) & (lat>bbox[0]))[0]
-    lon_filter = np.where((lon<bbox[1]) & (lon>bbox[3]))[0]
+
+    lat_filter = np.where((lat<float(bbox[2])) & (lat>float(bbox[0])))[0]
+    lon_filter = np.where((lon<float(bbox[1])) & (lon>float(bbox[3])))[0]
     spatial_index = list(set(lat_filter).intersection(set(lon_filter)))
 
     return spatial_index
@@ -233,11 +235,20 @@ def format_bbox_as_list(bbox_dict: dict) -> list:
 
 def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
     with tempfile.NamedTemporaryFile() as temp:
+        # temp.write('defaults')
         fileNameh5 = re.search("GEDI\d{2}_\D_.*", dl_url).group(0).replace(".h5", "")
-        filePathH5 = f'{temp.name}/{fileNameh5}.h5'
+        filePathH5 = f'{temp.name}{fileNameh5}.h5'
 
         session = sessionNASA(credentials['username'], credentials['password'])
         download_gedi(dl_url, temp.name, fileNameh5, session)
         gedi_data = getH5(filePathH5)
 
-    return gedi_data
+
+    return gedi_data, filePathH5
+
+
+def remove_h5_file(h5_object, file_path):
+    h5_object.close()
+    os.remove(file_path)
+
+    return True
