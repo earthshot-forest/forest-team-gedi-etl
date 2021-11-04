@@ -11,14 +11,19 @@ import yaml
 
 
 def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, credentials):
+    # ***** Download *****
     db_cred = yaml.safe_load(open('db_cred.yml'))
     table_name = f'gedi_{product}_data'
-    gedi_data = load_gedi_data(credentials, dl_url)
+    gedi_data, temp_file = load_gedi_data(credentials, dl_url)
 
-    parsed_gedi_data, array_list = parse_gedi_data(gedi_data, config_manager.configs[product]['subset'],
-                                       config_manager.configs[product]['exclusion'], bbox,
-                                       config_manager.configs[product]['lat_col'],
-                                       config_manager.configs[product]['long_col'])
+    # ***** transform *****
+    config = config_manager()
+    parsed_gedi_data, array_list = parse_gedi_data(gedi_data, config.configs[product]['subset'],
+                                       config.configs[product]['exclusion'], bbox,
+                                       config.configs[product]['lat_col'],
+                                       config.configs[product]['long_col'])
+
+    # ***** upload *****
     if parsed_gedi_data != False:
         data_types = {item:postgresql.ARRAY(sqlalchemy.types.FLOAT) for item in array_list}
         for k in parsed_gedi_data.keys():
@@ -30,11 +35,12 @@ def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, credent
                                    f"{db_cred['port']}/{db_cred['database']}")
             target_beam.to_postgis(name=table_name, con=engine, if_exists='append', dtype=data_types)
 
+    remove_h5_file(gedi_data, temp_file)
 
 def main():
     dl_url = 'https://e4ftl01.cr.usgs.gov/GEDI/GEDI01_B.001/2020.09.02/GEDI01_B_2020246094555_O09767_T08357_02_003_01.h5'
-    credentials = {'username': 'andreotte',
-                   'password': 'Nasa1\][/.,'
+    credentials = {'username': 'earthlabs_gedi',
+                   'password': 'Getthatdata1'
                    }
 
     gedi_dataset_ETL(dl_url, credentials)

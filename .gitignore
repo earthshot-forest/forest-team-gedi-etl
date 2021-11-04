@@ -134,3 +134,5 @@ db_cred.yml
 .idea/misc.xml
 .idea/inspectionProfiles/profiles_settings.xml
 .idea/forest-team-gedi-etl.iml
+aron_upload.py
+db_cred_temp.yml

@@ -1,5 +1,5 @@
 class config_manager:
-    def __init__(self, brand, model, type):
+    def __init__(self):
         self.l1bSubset = ['geolocation/latitude_bin0', 'geolocation/longitude_bin0', 'channel', 'shot_number',
                           'rxwaveform', 'rx_sample_count', 'stale_return_flag', 'tx_sample_count', 'txwaveform',
                           'geolocation/degrade', 'geolocation/delta_time', 'geolocation/digital_elevation_model',
@@ -15,6 +15,7 @@ class config_manager:
                           'stale_return_flag', 'surface_flag', 'geolocation/degrade_flag',
                           'geolocation/solar_elevation', 'geolocation/delta_time',
                           'geolocation/digital_elevation_model', 'geolocation/elev_lowestmode']
+        self.l4aSubset = ['long', 'lat', 'super_important_data']
         self.exclusions = ['pgap_theta_z', 'geolocation/surface_type']
         self.configs = {'1_B': {'subset':  self.l1bSubset,
                                 'exclusion': self.exclusions,
@@ -22,10 +23,14 @@ class config_manager:
                                 'long_col': 'longitude_bin0'},
                         '2_A': {'subset':  self.l2aSubset,
                                 'exclusion': self.exclusions,
-                                'lat_col': 'latitude_bin0',
-                                'long_col': 'longitude_bin0'},
+                                'lat_col': 'lat_lowestmode',
+                                'long_col': 'lon_lowestmode'},
                         '2_B': {'subset':  self.l2bSubset,
                                 'exclusion': self.exclusions,
                                 'lat_col': 'latitude_bin0',
-                                'long_col': 'longitude_bin0'}
+                                'long_col': 'longitude_bin0'},
+                        '4_A': {'subset':  self.l4aSubset,
+                                'exclusion': self.exclusions,
+                                'lat_col': 'lat',
+                                'long_col': 'long'}
                         }
