@@ -110,7 +110,7 @@ def connect_to_rabbitmq(rab_config: dict) -> list:
     else:
         return None
 
-def produce_gedi_download_tasks(bbox: dict, products: list, version: str) -> dict:
+def produce_gedi_download_tasks(bbox: dict, products: list, version: str, dataset_label: str) -> dict:
     """Produce a dict message that can be passed into produce_rabbitmq_message
     :param bbox: An area of interest as a dictionary containing keys
         'ul_lat', 'ul_long', 'lr_lat', 'lr_lon'
@@ -123,7 +123,8 @@ def produce_gedi_download_tasks(bbox: dict, products: list, version: str) -> dic
     if valid_inputs:
         return {'products': products,
                 'version': version,
-                'bbox': bbox}
+                'bbox': bbox,
+                'dataset_label': dataset_label}
     else:
         return None
 
@@ -152,26 +153,37 @@ def produce_rabbitmq_message(channel, connection, routing_key: str, message: dic
         print('invalid routing key')
 
 
+def main():
+    rab_config = {'username': 'andreotte',
+                  'password': 'Nasa1\][/.,',
+                  'host': 'localhost',
+                  }
 
-rab_config = {'username': 'andreotte',
-              'password': 'Nasa1\][/.,',
-              'host': 'localhost',
-              }
+    bbox = {'ul_lat': '44.0285565760225026',
+             'ul_lon': '-122.2452749872689992',
+             'lr_lat': '44.1375557115117019',
+             'lr_lon': '-122.4007032176819934'}
 
-bbox = {'ul_lat': '44.0285565760225026',
-         'ul_lon': '-122.2452749872689992',
-         'lr_lat': '44.1375557115117019',
-         'lr_lon': '-122.4007032176819934'}
+    products = ['1_B', '2_A', '2_B']
 
-products = ['1_B', '2_A', '2_B']
+    version = '001'
 
-version = '001'
+    message = {'products': products,
+               'version': version,
+               'bbox': bbox}
+    dataset_label = 'test_data'
+    # actual use, aoi
+    [channel, connection] = connect_to_rabbitmq(rab_config)
+    message = produce_gedi_download_tasks(bbox, products, version, dataset_label)
+    produce_rabbitmq_message(channel, connection, 'aoi', message)
 
-message = {'products': products,
-           'version': version,
-           'bbox': bbox}
 
-# actual use, aoi
-[channel, connection] = connect_to_rabbitmq(rab_config)
-message = produce_gedi_download_tasks(bbox, products, version)
-produce_rabbitmq_message(channel, connection, 'aoi', message)
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Interrupted')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)

@@ -10,9 +10,11 @@ import sqlalchemy
 import yaml
 
 
-def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, credentials):
-    # ***** Download *****
+def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label):
     db_cred = yaml.safe_load(open('db_cred.yml'))
+    credentials = {'username': 'earthlabs_gedi',
+                   'password': 'Getthatdata1'
+                   }
     table_name = f'gedi_{product}_data'
     gedi_data, temp_file = load_gedi_data(credentials, dl_url)
 
