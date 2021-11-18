@@ -61,8 +61,7 @@ def get_4a_gedi_download_links(bbox):
     concept_id = requests.get(doisearch).json()['feed']['entry'][0]['id'] # NASA EarthData's unique ID for 4a dataset
 
     #There is a way to get files by polygon, but sticking with a rectangle for now.
-    # bound = (bbox['lr_lon'], bbox['ul_lat'], bbox['ul_lon'], bbox['lr_lat']) #Western, Southern, Eastern, Northern extentes of the AOI 
-    bound = (float(bbox[3]), float(bbox[0]), float(bbox[1]), float(bbox[2])) #Western, Southern, Eastern, Northern extentes of the AOI 
+    bound = (float(bbox[1]), float(bbox[2]), float(bbox[3]), float(bbox[0])) #Western, Southern, Eastern, Northern extentes of the AOI 
 
     # time bound
     start_date = dt.datetime(1999, 1, 1)
@@ -138,8 +137,6 @@ def get_4a_gedi_download_links(bbox):
     print ("4a - Total granules found: ", len(l4adf.index)-1)
     print ("4a - Total file size (MB): ", l4adf['granule_size'].sum())
 
-    # print(l4adf.head())
-
     urls = []
     for index, row in l4adf.iterrows():
         urls.append(row['granule_url'])
@@ -194,7 +191,7 @@ def write_to_database(gdf, db_cred, schema, table):
     return True
 
 
-def get_aoi_x_y_index(data, bbox, lat_column, lon_column):
+def get_aoi_x_y_index(data, bbox, lat_column, lon_column, product):
     """
         Reads raster data from raster file.
 
@@ -208,20 +205,26 @@ def get_aoi_x_y_index(data, bbox, lat_column, lon_column):
             A str representing the column that has the latitude coordinates
         lon_column : str
             A str representing the column that has the longitude coordinates
+        product: str
+            A str representing the GEDI product type
 
         Returns
         -------
         spatial_index: list
             list of index values that are inside the bounding box.
     """
-    # lat = np.array(data['geolocation'][lat_column][()])
-    # lon = np.array(data['geolocation'][lon_column][()])
-    lat = np.array(data[lat_column][()])
-    lon = np.array(data[lon_column][()])
+    if product != '4_A': 
+        lat = np.array(data['geolocation'][lat_column][()])
+        lon = np.array(data['geolocation'][lon_column][()])
+    else: #4a data has the lat and long layers one level higher than the other products.
+        lat = np.array(data[lat_column][()])
+        lon = np.array(data[lon_column][()])
+    
     np.nan_to_num(lat, nan=0)
     np.nan_to_num(lon, nan=0)
-    lat_filter = np.where((lat<bbox[2]) & (lat>bbox[0]))[0]
-    lon_filter = np.where((lon<bbox[1]) & (lon>bbox[3]))[0]
+
+    lat_filter = np.where((lat < float(bbox[2])) & (lat > float(bbox[0])))[0]
+    lon_filter = np.where((lon > float(bbox[3])) & (lon < float(bbox[1])))[0]
     spatial_index = list(set(lat_filter).intersection(set(lon_filter)))
 
     return spatial_index
@@ -261,7 +264,7 @@ def insert_pandas_column(df, column_name, array_list, spatial_index, data):
     return df, array_list
 
 
-def parse_gedi_data(gedi_data, column_subset, excluded_columns, bbox, lat_column, lon_column):
+def parse_gedi_data(gedi_data, column_subset, excluded_columns, bbox, lat_column, lon_column, product):
     """
         Parses gedi data into a GeoPandas GeoDataFrame. The function starts by iterating through the beams and then
         each column in the column_subset variable. The value associated with each column can range from single values to
@@ -282,6 +285,8 @@ def parse_gedi_data(gedi_data, column_subset, excluded_columns, bbox, lat_column
             A str representing the column that has the latitude coordinates
         lon_column : str
             A str representing the column that has the longitude coordinates
+        product: str
+            A str representing the GEDI product type
 
         Returns
         -------
@@ -290,12 +295,12 @@ def parse_gedi_data(gedi_data, column_subset, excluded_columns, bbox, lat_column
     """
     parsed_data = {}
     for k in gedi_data.keys():
-        if k != 'METADATA':
+        if k[0:4] == 'BEAM':
             gediDF = pd.DataFrame()
             array_list = []
-            spatial_index = np.sort(get_aoi_x_y_index(gedi_data[k], bbox, lat_column, lon_column))
+            spatial_index = np.sort(get_aoi_x_y_index(gedi_data[k], bbox, lat_column, lon_column, product))
             if len(spatial_index) == 0:
-                return False, False
+                continue #return False, False #4b data has spatial_index != 0 for BEAM1000 and BEAM1011, but nothing before it.
             for column in column_subset:
                 column_name = column.split('/')[-1]
                 if column not in excluded_columns:
@@ -321,8 +326,9 @@ def parse_gedi_data(gedi_data, column_subset, excluded_columns, bbox, lat_column
                             gediDF, array_list = insert_pandas_column(gediDF, column_name, array_list, spatial_index, data)
             geoDF = geopandas.GeoDataFrame(gediDF, geometry=geopandas.points_from_xy(gediDF[lon_column],
                                                                                      gediDF[lat_column]))
-            geoDF = geoDF.rename_geometry('geom')
+            geoDF = geoDF.rename_geometry('geom')        
             parsed_data[k] = geoDF
+            
 
     return parsed_data, array_list
 
@@ -335,7 +341,6 @@ def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
     with tempfile.NamedTemporaryFile() as temp:
         fileNameh5 = re.search("GEDI\d{2}_\D_.*", dl_url).group(0).replace(".h5", "")
         filePathH5 = f'{temp.name}{fileNameh5}.h5'
-
         session = sessionNASA(credentials['username'], credentials['password'])
         download_gedi(dl_url, temp.name, fileNameh5, session)
         gedi_data = getH5(filePathH5)
