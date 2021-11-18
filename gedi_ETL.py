@@ -14,9 +14,11 @@ import yaml
 
 def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, filename, credentials):
     db_cred = yaml.safe_load(open('db_cred.yml'))
+    credentials = {'username': 'earthlabs_gedi',
+                   'password': 'Getthatdata1'
+                   }
     table_name = f'gedi_{product}_data'
-    gedi_data = load_gedi_data(credentials, dl_url)
-    config = config_manager()
+    gedi_data, temp_file = load_gedi_data(credentials, dl_url)
 
     parsed_gedi_data, array_list = parse_gedi_data(gedi_data, config.configs[product]['subset'],
                                        config.configs[product]['exclusion'], bbox,
@@ -36,14 +38,13 @@ def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, filenam
             engine = create_engine(f"postgresql://{db_cred['user']}:{db_cred['password']}@{db_cred['host']}:"
                                    f"{db_cred['port']}/{db_cred['database']}")
 
-            target_beam.to_postgis(name="gedi_4a", con=engine, if_exists='append', dtype=data_types)
+    remove_h5_file(gedi_data, temp_file)
 
 
 def main():
-    urls = []
-
-    credentials = {'username': '',
-                   'password': ''
+    dl_url = 'https://e4ftl01.cr.usgs.gov/GEDI/GEDI01_B.001/2020.09.02/GEDI01_B_2020246094555_O09767_T08357_02_003_01.h5'
+    credentials = {'username': 'earthlabs_gedi',
+                   'password': 'Getthatdata1'
                    }
     for dl_url in urls:
         product = '4_A'

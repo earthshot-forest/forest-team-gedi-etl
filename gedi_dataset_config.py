@@ -1,5 +1,4 @@
 class config_manager:
-#     def __init__(self, brand, model, type):
     def __init__(self):
         self.l1bSubset = ['geolocation/latitude_bin0', 'geolocation/longitude_bin0', 'channel', 'shot_number',
                           'rxwaveform', 'rx_sample_count', 'stale_return_flag', 'tx_sample_count', 'txwaveform',
@@ -24,9 +23,13 @@ class config_manager:
                                 'long_col': 'longitude_bin0'},
                         '2_A': {'subset':  self.l2aSubset,
                                 'exclusion': self.exclusions,
+                                'lat_col': 'lat_lowestmode',
+                                'long_col': 'lon_lowestmode'},
+                        '2_B': {'subset':  self.l2bSubset,
+                                'exclusion': self.exclusions,
                                 'lat_col': 'latitude_bin0',
                                 'long_col': 'longitude_bin0'},
-                        '2_B': {'subset':  self.l2bSubset,
+                        '4_A': {'subset':  self.l4aSubset,
                                 'exclusion': self.exclusions,
                                 'lat_col': 'lat_lowestmode',
                                 'long_col': 'lon_lowestmode'},

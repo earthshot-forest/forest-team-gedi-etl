@@ -23,7 +23,7 @@ def download_gedi(url, outdir, fileName, session):
     try:
         os.makedirs(outdir)
     except OSError:
-        print(f"    WANRING - Creation of the subdirectory {outdir} failed or already exists")
+        print(f"    WARNING - Creation of the subdirectory {outdir} failed or already exists")
     else:
         print(f"    Created the subdirectory {outdir}")
 
@@ -32,6 +32,7 @@ def download_gedi(url, outdir, fileName, session):
     with open(path, 'wb') as f:
         response = session.get(url, stream=True)
         total = response.headers.get('content-length')
+        print(session)
         if total is None:
             f.write(response.content)
         else:
@@ -162,6 +163,7 @@ def get_gedi_download_links(product, version, bbox):
 
     content = requests.get(url)
     listh5 = content.json().get('data')
+
     return listh5
 
 
@@ -339,10 +341,18 @@ def format_bbox_as_list(bbox_dict: dict) -> list:
 
 def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
     with tempfile.NamedTemporaryFile() as temp:
+        # temp.write('defaults')
         fileNameh5 = re.search("GEDI\d{2}_\D_.*", dl_url).group(0).replace(".h5", "")
         filePathH5 = f'{temp.name}{fileNameh5}.h5'
+
         session = sessionNASA(credentials['username'], credentials['password'])
         download_gedi(dl_url, temp.name, fileNameh5, session)
         gedi_data = getH5(filePathH5)
 
-    return gedi_data
+
+def remove_h5_file(h5_object, file_path):
+    h5_object.close()
+    os.remove(file_path)
+
+    return True
+
