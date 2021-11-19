@@ -11,7 +11,7 @@ def get_download_links(products: list, version: str, bbox: dict) -> dict:
 
 
 def main():
-    products = ['GEDI_I04_A']
+    products = ['GEDI01_B']
     # products = ['GEDI01_B', 'GEDI02_A', 'GEDI02_B', 'GEDI_I04_A']
     version = '001'
     bbox = {'ul_lat': '44.1375557115117019',

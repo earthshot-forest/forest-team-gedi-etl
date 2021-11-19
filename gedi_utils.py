@@ -344,11 +344,12 @@ def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
         # temp.write('defaults')
         fileNameh5 = re.search("GEDI\d{2}_\D_.*", dl_url).group(0).replace(".h5", "")
         filePathH5 = f'{temp.name}{fileNameh5}.h5'
-
+        
         session = sessionNASA(credentials['username'], credentials['password'])
         download_gedi(dl_url, temp.name, fileNameh5, session)
         gedi_data = getH5(filePathH5)
-
+    
+    return gedi_data, filePathH5
 
 def remove_h5_file(h5_object, file_path):
     h5_object.close()
