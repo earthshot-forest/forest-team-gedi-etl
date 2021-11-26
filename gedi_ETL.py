@@ -42,7 +42,7 @@ def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, filenam
             engine = create_engine(f"postgresql://{db_cred['user']}:{db_cred['password']}@{db_cred['host']}:"
                                    f"{db_cred['port']}/{db_cred['database']}")
 
-            target_beam.to_postgis(name='delete_me_1b', con=engine, if_exists='append', dtype=data_types)
+            target_beam.to_postgis(name=table_name, con=engine, if_exists='append', dtype=data_types)
 
     remove_h5_file(gedi_data, temp_file)
 
