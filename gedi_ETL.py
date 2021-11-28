@@ -1,4 +1,3 @@
-from numpy.core.fromnumeric import prod
 from pyGEDI import *
 from sqlalchemy.sql.sqltypes import DateTime
 from gedi_utils import *
@@ -45,7 +44,6 @@ def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, filenam
             target_beam.to_postgis(name=table_name, con=engine, if_exists='append', dtype=data_types)
 
     remove_h5_file(gedi_data, temp_file)
-
 
 def main():
     

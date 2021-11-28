@@ -55,6 +55,7 @@ def get_4a_gedi_download_links(bbox):
     This code was adapted from NASA's tutorial - https://github.com/ornldaac/gedi_tutorials/blob/main/1_gedi_l4a_search_download.ipynb
     It currently returns all data, but could take in a date range to only get data collected from that range. It could also be altered to
     take in a polygon instead of a bbox.
+    :bbox: the bounding box defining area of interest.
     """
     doi = '10.3334/ORNLDAAC/1907'# GEDI L4A DOI 
     cmrurl='https://cmr.earthdata.nasa.gov/search/' # CMR API base url 
