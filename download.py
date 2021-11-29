@@ -1,12 +1,31 @@
+from typing import Dict, List
 from pyGEDI import *
 from gedi_utils import *
 
 
-def get_download_links(products: list, version: str, bbox: dict) -> dict:
+# TODO: make typehints from typing and check them (I thinks som are wrong)
+def get_download_links(products: List, version: str, bbox: Dict) -> Dict:
+    """Retrieve the download links for specified parameters.
+
+    Parameters
+    ----------
+    products : list
+        the data products to retreive links for.
+    version : str
+        the version to retrieve links for.
+    bbox : dict
+        the bounding box to retreive links for.
+
+    Returns
+    -------
+    list
+        The list of download links.
+    """
     download_links_dict = {}
     for product in products:
-        download_links_dict[product] = get_gedi_download_links(product, version, bbox)
-
+        download_links_dict[product] = get_gedi_download_links(
+            product, version, bbox
+        )
     return download_links_dict
 
 
