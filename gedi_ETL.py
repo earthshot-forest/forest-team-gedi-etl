@@ -13,8 +13,8 @@ import yaml
 
 def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, filename, credentials):
     db_cred = yaml.safe_load(open('db_cred.yml'))
-    credentials = {'username': 'earthlabs_gedi',
-                   'password': 'Getthatdata1'
+    credentials = {'username': '',
+                   'password': ''
                    }
     table_name = f'gedi_{product}_data'
     gedi_data, temp_file = load_gedi_data(credentials, dl_url)
@@ -52,8 +52,8 @@ def main():
 ,'https://e4ftl01.cr.usgs.gov/GEDI/GEDI01_B.001/2020.08.13/GEDI01_B_2020226173409_O09462_T03935_02_003_01.h5'
     ]
 
-    credentials = {'username': 'earthlabs_gedi',
-                   'password': 'Getthatdata1'
+    credentials = {'username': '',
+                   'password': ''
                    }
 
     product = '1_B'

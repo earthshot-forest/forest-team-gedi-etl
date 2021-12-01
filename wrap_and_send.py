@@ -154,8 +154,8 @@ def produce_rabbitmq_message(channel, connection, routing_key: str, message: dic
 
 
 def main():
-    rab_config = {'username': 'andreotte',
-                  'password': 'Nasa1\][/.,',
+    rab_config = {'username': '',
+                  'password': '',
                   'host': 'localhost',
                   }
 
