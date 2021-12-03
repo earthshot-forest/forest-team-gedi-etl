@@ -1,0 +1,3 @@
+[submodule "pygedi"]
+	path = pygedi
+	url = https://github.com/walkeralexander/pyGEDI
