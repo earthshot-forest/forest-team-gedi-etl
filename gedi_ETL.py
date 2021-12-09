@@ -11,11 +11,12 @@ from sqlalchemy.dialects import postgresql
 import sqlalchemy
 import yaml
 
-def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, filename, credentials):
+def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, filename):
     db_cred = yaml.safe_load(open('db_cred.yml'))
-    credentials = {'username': '',
-                   'password': ''
+    credentials = {'username': db_cred['earthdata_username'],
+                   'password': db_cred['earthdata_password']
                    }
+
     table_name = f'gedi_{product}_data'
     gedi_data, temp_file = load_gedi_data(credentials, dl_url)
 
@@ -45,26 +46,28 @@ def gedi_dataset_ETL(dl_url, product, bbox, declared_crs, dataset_label, filenam
 
     remove_h5_file(gedi_data, temp_file)
 
+def get_download_links(product: str, version: str, bbox: dict) -> dict:
+    download_links_dict = {}
+    download_links_dict[product] = get_gedi_download_links(product, version, bbox)
+
+    return download_links_dict
+
 def main():
-    
-    urls = [ 
-'https://e4ftl01.cr.usgs.gov/GEDI/GEDI01_B.001/2020.08.16/GEDI01_B_2020229212552_O09511_T02959_02_003_01.h5'
-,'https://e4ftl01.cr.usgs.gov/GEDI/GEDI01_B.001/2020.08.13/GEDI01_B_2020226173409_O09462_T03935_02_003_01.h5'
-    ]
-
-    credentials = {'username': '',
-                   'password': ''
-                   }
-
-    product = '1_B'
+    products = ['GEDI_I04_A', 'GEDI02_B']
+    # products = ['GEDI01_B', 'GEDI02_A', 'GEDI02_B', 'GEDI_I04_A']
+    version = '001'
     crs = 'epsg:4326'
     dataset_label = ''
-    bbox = ['44.0285565760225026', '-122.217242', '44.1375557115117019', '-122.4007032176819934'] #ul_lat, ul_lon, lr_lat, lr_lon #PNW AOI
 
-    for dl_url in urls:
-        filename = dl_url[dl_url.find(f'GEDI0{product}'):]
-        
-        gedi_dataset_ETL(dl_url, product, bbox, crs, dataset_label, filename, credentials)
+    bbox = ['44.1375557115117019', '-122.4007032176819934', '44.0285565760225026', '-122.217242'] #ul_lat, ul_lon, lr_lat, lr_lon #PNW AOI
+    
+    for product in products:
+        links = get_download_links(product, version, bbox)
+            
+        for dl_url in links[product]:
+            filename = dl_url[dl_url.find(f'GEDI0{product[-3:]}'):]
+            
+            gedi_dataset_ETL(dl_url, product[-3:], bbox, crs, dataset_label, filename)
 
 if __name__ == "__main__":
     main()

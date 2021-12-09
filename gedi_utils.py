@@ -335,11 +335,6 @@ def parse_gedi_data(gedi_data, column_subset, excluded_columns, bbox, lat_column
 
     return parsed_data, array_list
 
-
-def format_bbox_as_list(bbox_dict: dict) -> list:
-    return [bbox_dict['ul_lat'], bbox_dict['ul_lon'], bbox_dict['lr_lat'], bbox_dict['lr_lon']]
-
-
 def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
     with tempfile.NamedTemporaryFile() as temp:
         # temp.write('defaults')
