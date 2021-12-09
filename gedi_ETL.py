@@ -3,6 +3,7 @@ from sqlalchemy.sql.sqltypes import DateTime
 from gedi_utils import *
 from gedi_dataset_config import config_manager
 from datetime import datetime
+import argparse
 import tempfile
 import os
 import random
@@ -53,13 +54,19 @@ def get_download_links(product: str, version: str, bbox: dict) -> dict:
     return download_links_dict
 
 def main():
-    products = ['GEDI_I04_A', 'GEDI02_B']
-    # products = ['GEDI01_B', 'GEDI02_A', 'GEDI02_B', 'GEDI_I04_A']
-    version = '001'
-    crs = 'epsg:4326'
-    dataset_label = ''
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--products', type=str, required=True)
+    parser.add_argument('--bbox', type=str, required=True)
+    parser.add_argument('--label', type=str, required=True)
+    parser.add_argument('--crs', type=str, required=False)
 
-    bbox = ['44.1375557115117019', '-122.4007032176819934', '44.0285565760225026', '-122.217242'] #ul_lat, ul_lon, lr_lat, lr_lon #PNW AOI
+    args = parser.parse_args()
+    
+    products = args.products.split(',')
+    bbox = args.bbox.split(',')
+    dataset_label = args.label
+    crs = args.crs or 'epsg:4326'       
+    version = '001'
     
     for product in products:
         links = get_download_links(product, version, bbox)
