@@ -11,6 +11,7 @@ import sys
 import requests
 import numbers
 import tempfile
+import shutil
 
 
 def download_gedi(url, outdir, fileName, session):
@@ -32,7 +33,6 @@ def download_gedi(url, outdir, fileName, session):
     with open(path, 'wb') as f:
         response = session.get(url, stream=True)
         total = response.headers.get('content-length')
-        print(session)
         if total is None:
             f.write(response.content)
         else:
@@ -153,7 +153,7 @@ def get_gedi_download_links(product, version, bbox):
     :param bbox: An area of interest as an array containing the upper left lat, upper left long, lower right lat and lower right long coordinates -
      [ul_lat,ul_lon,lr_lat,lr_lon]
     """
-    if product == 'GEDI_I04_A':
+    if product == 'GEDI04_A':
         return get_4a_gedi_download_links(bbox)
 
     bboxStr = bbox[0] + ',' + bbox[1] + ',' + bbox[2] + ',' + bbox[3]
@@ -226,8 +226,8 @@ def get_aoi_x_y_index(data, bbox, lat_column, lon_column, product):
     np.nan_to_num(lat, nan=0)
     np.nan_to_num(lon, nan=0)
 
-    lat_filter = np.where((lat < float(bbox[2])) & (lat > float(bbox[0])))[0]
-    lon_filter = np.where((lon > float(bbox[3])) & (lon < float(bbox[1])))[0]
+    lat_filter = np.where((lat > float(bbox[2])) & (lat < float(bbox[0])))[0]
+    lon_filter = np.where((lon < float(bbox[3])) & (lon > float(bbox[1])))[0]
     spatial_index = list(set(lat_filter).intersection(set(lon_filter)))
 
     return spatial_index
@@ -347,9 +347,16 @@ def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
     
     return gedi_data, filePathH5
 
-def remove_h5_file(h5_object, file_path):
-    h5_object.close()
-    os.remove(file_path)
+def remove_or_store_h5_file(file_path, do_store_file, store_path):
+    try:
+        # h5_object.close()
+        if do_store_file:
+            new_file_name = re.search("GEDI.*", file_path)[0]
+            shutil.move(file_path, f'{store_path}\\{new_file_name}')
+        else:
+            os.remove(file_path)
+    except OSError as e:
+        print(f'Error while moving or deleting {file_path}. Exception: {e}')
 
     return True
 
