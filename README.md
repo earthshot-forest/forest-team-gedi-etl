@@ -1,4 +1,10 @@
 # forest-team-gedi-etl
+Pull, clip, and store GEDI level 1b, 2a, 2b, and 4b data.
+
+# In progress:
+- Turn this into a command line tool for public use
+- Integrate Rabbit MQ, so the downloads and process steps happen asynchronously.
+- Explore adding an API layer
 
 ## To install your own RabbitMQ server and set it up
 Use this link for info on installing the server and starting it. https://www.rabbitmq.com/download.html
