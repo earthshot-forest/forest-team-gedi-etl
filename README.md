@@ -15,13 +15,13 @@ The basic flow of the program:
 
 # Running the command line tool
 The script take a number of parameters as inputs. 
-    -products - comma separated list of GEDI products to download and process. Example: '2a, 2b' - type=str, required=True
-    -bbox - comma separated bounding box as upper_left_lat, upper_left_lon, lower_right_lat, lower_right_lon. 
-            Example: 45.02, -111.09, 44.13, -110.00 represents an AOI covering Yellowstone National Park - type=str, required=True
-    -label - The label that will be attached to each row in the Postgres serve - type=str, required=True
-    -crs - The coordinate system. Example: 4326 - type=str, required=False
-    -store_file - A bool indicating storage of the raw H5 file - type=bool, required=False
-    -store_path - The file system location to store the raw H5 file - type=str, required=False
+1. products - comma separated list of GEDI products to download and process. Example: '2a, 2b' - type=str, required=True
+2. bbox - comma separated bounding box as upper_left_lat, upper_left_lon, lower_right_lat, lower_right_lon. 
+Example: 45.02, -111.09, 44.13, -110.00 represents an AOI covering Yellowstone National Park - type=str, required=True
+3. label - The label that will be attached to each row in the Postgres serve - type=str, required=True
+4. crs - The coordinate system. Example: 4326 - type=str, required=False
+5. store_file - A bool indicating storage of the raw H5 file - type=bool, required=False
+6. store_path - The file system location to store the raw H5 file - type=str, required=False
 
 # In progress:
 - Integrate Rabbit MQ, so the downloads and process steps happen asynchronously.
