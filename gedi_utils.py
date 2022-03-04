@@ -57,7 +57,7 @@ def get_4a_gedi_download_links(bbox):
     take in a polygon instead of a bbox.
     :bbox: the bounding box defining area of interest.
     """
-    doi = '10.3334/ORNLDAAC/1907'# GEDI L4A DOI 
+    doi = '10.3334/ORNLDAAC/1986'# GEDI L4A DOI 
     cmrurl='https://cmr.earthdata.nasa.gov/search/' # CMR API base url 
     doisearch = cmrurl + 'collections.json?doi=' + doi
     concept_id = requests.get(doisearch).json()['feed']['entry'][0]['id'] # NASA EarthData's unique ID for 4a dataset

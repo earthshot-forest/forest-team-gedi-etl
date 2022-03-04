@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--products", "GEDI04_A", 
+                // ul lat, ul long, lr lat, lr long
+                // "--bbox", "-2.5113, -55.0598, -3.7403, -54.1948", //amazon
+                "--bbox", "44.41, -122.64, 44.13, -121.99", //pnw 
+                "--label", "amazon-para-brazil", 
+                "--crs", "epsg:4326",
+                "--store_file", "True",
+                "--store_path", "E:\\EarthshotStorage\\CascadeFull\\4a"
+            ]
+        }
+    ]
+}
