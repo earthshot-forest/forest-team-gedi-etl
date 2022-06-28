@@ -41,13 +41,13 @@ def download_gedi(url, outdir, fileName, session):
             for data in response.iter_content(chunk_size=max(int(total / 1000), 1024 * 1024)):
                 downloaded += len(data)
                 f.write(data)
-                done = int(100 * downloaded / total)
-                gb = float(total / 1073741824)
+    #             done = int(100 * downloaded / total)
+    #             gb = float(total / 1073741824)
 
-                sys.stdout.write('\r' + '   ' + url[url.rfind(':') + 52:] + ' | ' + str(gb)[:5] + 'GB | ' + str(
-                    100 * downloaded / total) + '% [{}{}]'.format('█' * done, '.' * (100 - done)))
-                sys.stdout.flush()
-    sys.stdout.write('\n')
+    #             sys.stdout.write('\r' + '   ' + url[url.rfind(':') + 52:] + ' | ' + str(gb)[:5] + 'GB | ' + str(
+    #                 100 * downloaded / total) + '% [{}{}]'.format('█' * done, '.' * (100 - done)))
+    #             sys.stdout.flush()
+    # sys.stdout.write('\n')
     print(f"    {fileName} download complete.")
 
 def get_4a_gedi_download_links(bbox):
@@ -60,14 +60,19 @@ def get_4a_gedi_download_links(bbox):
     doi = '10.3334/ORNLDAAC/1986'# GEDI L4A DOI 
     cmrurl='https://cmr.earthdata.nasa.gov/search/' # CMR API base url 
     doisearch = cmrurl + 'collections.json?doi=' + doi
-    concept_id = requests.get(doisearch).json()['feed']['entry'][0]['id'] # NASA EarthData's unique ID for 4a dataset
+
+    concept_id = 'C2237824918-ORNL_CLOUD' #When the NASA engineers on on a coffee break, this has to be hardcoded because it doesn't work otherwise.
+    # concept_id = requests.get(doisearch).json()['feed']['entry'][0]['id'] # NASA EarthData's unique ID for 4a dataset
 
     #There is a way to get files by polygon, but sticking with a rectangle for now.
     bound = (float(bbox[1]), float(bbox[2]), float(bbox[3]), float(bbox[0])) #Western, Southern, Eastern, Northern extentes of the AOI 
 
     # time bound
-    start_date = dt.datetime(1999, 1, 1)
-    end_date = dt.datetime(2050, 1, 31)
+    # start_date = dt.datetime(2021, 7, 1) # specify your own start date
+    # end_date = dt.datetime(2022, 7, 31)  # specify your end start date
+    start_date = dt.datetime(1999, 1, 1) # specify your own start date
+    end_date = dt.datetime(2025, 1, 1)  # specify your end start date
+
     # CMR formatted start and end times
     dt_format = '%Y-%m-%dT%H:%M:%SZ'
     temporal_str = start_date.strftime(dt_format) + ',' + end_date.strftime(dt_format)
@@ -343,7 +348,10 @@ def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
         
         session = sessionNASA(credentials['username'], credentials['password'])
         download_gedi(dl_url, temp.name, fileNameh5, session)
-        gedi_data = getH5(filePathH5)
+        
+        #for testing when I don't want to download the files again.
+        # filePathH5 = "E:\\EarthshotStorage\\MichiganAoiGediData\\4aFull\\GEDI04_A_2021238093451_O15316_02_T09151_02_002_02_V002.h5"
+        gedi_data = getH5(filePathH5) 
     
     return gedi_data, filePathH5
 

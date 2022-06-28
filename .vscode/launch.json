@@ -10,12 +10,12 @@
             "args": [
                 "--products", "GEDI04_A", 
                 // ul lat, ul long, lr lat, lr long
-                // "--bbox", "-2.5113, -55.0598, -3.7403, -54.1948", //amazon
-                "--bbox", "44.41, -122.64, 44.13, -121.99", //pnw 
-                "--label", "amazon-para-brazil", 
+                // "--bbox", "44.13, -121.99, 44.13, -121.99", //pnw 
+                "--bbox", "43.042,-85.507,43.015,-85.473",
+                "--label", "michigan-csga", 
                 "--crs", "epsg:4326",
                 "--store_file", "True",
-                "--store_path", "E:\\EarthshotStorage\\CascadeFull\\4a"
+                "--store_path", "E:\\EarthshotStorage\\MichiganAoiGediData\\4aFull"
             ]
         }
     ]
