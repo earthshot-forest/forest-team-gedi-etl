@@ -7,9 +7,7 @@ import geopandas
 from shapely.geometry import MultiPolygon, Point, Polygon, box
 import datetime as dt
 from sqlalchemy import create_engine
-import sys
 import requests
-import numbers
 import tempfile
 import shutil
 
@@ -20,13 +18,13 @@ def download_gedi(url, outdir, fileName, session):
     :param outdir: The root directory for the .h5 files
     :param session: The EarthData session
     """
-    print(f"    Begin {fileName} download from EarthData.")
     try:
         os.makedirs(outdir)
     except OSError:
-        print(f"    WARNING - Creation of the subdirectory {outdir} failed or already exists")
-    else:
-        print(f"    Created the subdirectory {outdir}")
+        pass
+        # print(f"WARNING - Creation of the subdirectory {outdir} failed or already exists")
+    # else:
+    #     print(f"Created the subdirectory {outdir}")
 
     path = outdir + fileName + ".h5"
 
@@ -41,14 +39,6 @@ def download_gedi(url, outdir, fileName, session):
             for data in response.iter_content(chunk_size=max(int(total / 1000), 1024 * 1024)):
                 downloaded += len(data)
                 f.write(data)
-    #             done = int(100 * downloaded / total)
-    #             gb = float(total / 1073741824)
-
-    #             sys.stdout.write('\r' + '   ' + url[url.rfind(':') + 52:] + ' | ' + str(gb)[:5] + 'GB | ' + str(
-    #                 100 * downloaded / total) + '% [{}{}]'.format('█' * done, '.' * (100 - done)))
-    #             sys.stdout.flush()
-    # sys.stdout.write('\n')
-    print(f"    {fileName} download complete.")
 
 def get_4a_gedi_download_links(bbox):
     """Given a bounding box, get the download urls for GEDI level 4a data.
@@ -141,15 +131,11 @@ def get_4a_gedi_download_links(bbox):
     # Drop granules with empty geometry
     l4adf = l4adf[l4adf['granule_poly'] != '']
 
-    print ("4a - Total granules found: ", len(l4adf.index)-1)
-    print ("4a - Total file size (MB): ", l4adf['granule_size'].sum())
-
     urls = []
     for index, row in l4adf.iterrows():
         urls.append(row['granule_url'])
-        print(row['granule_url'])
     
-    return urls
+    return urls#, l4adf['granule_size'].sum()
 
 def get_gedi_download_links(product, version, bbox):
     """Get a list of download links that intersect an AOI from the GEDI Finder web service.
@@ -164,8 +150,6 @@ def get_gedi_download_links(product, version, bbox):
     bboxStr = bbox[0] + ',' + bbox[1] + ',' + bbox[2] + ',' + bbox[3]
     url = 'https://lpdaacsvc.cr.usgs.gov/services/gedifinder?product=' + product + '&version=' + str(
         version) + '&bbox=' + bboxStr + '&output=json'
-
-    print(f"{product} downloads: {url}")
 
     content = requests.get(url)
     listh5 = content.json().get('data')
@@ -337,7 +321,6 @@ def parse_gedi_data(gedi_data, column_subset, excluded_columns, bbox, lat_column
             geoDF = geoDF.rename_geometry('geom')        
             parsed_data[k] = geoDF
             
-
     return parsed_data, array_list
 
 def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
@@ -351,20 +334,15 @@ def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
         
         #for testing when I don't want to download the files again.
         # filePathH5 = "E:\\EarthshotStorage\\MichiganAoiGediData\\4aFull\\GEDI04_A_2021238093451_O15316_02_T09151_02_002_02_V002.h5"
-        gedi_data = getH5(filePathH5) 
+        gedi_data = getH5(filePathH5)
     
     return gedi_data, filePathH5
 
 def remove_or_store_h5_file(file_path, do_store_file, store_path):
-    try:
-        # h5_object.close()
-        if do_store_file:
-            new_file_name = re.search("GEDI.*", file_path)[0]
-            shutil.move(file_path, f'{store_path}\\{new_file_name}')
-        else:
-            os.remove(file_path)
-    except OSError as e:
-        print(f'Error while moving or deleting {file_path}. Exception: {e}')
-
-    return True
+    # h5_object.close()
+    if do_store_file:
+        new_file_name = re.search("GEDI.*", file_path)[0]
+        shutil.move(file_path, f'{store_path}{os.sep}{new_file_name}')
+    else:
+        os.remove(file_path)
 
