@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--products", "GEDI04_A", 
+                // ul lat, ul long, lr lat, lr long
+                // "--bbox", "44.13, -121.99, 44.13, -121.99", //pnw 
+                "--bbox", "43.042,-85.507,43.015,-85.473",
+                "--label", "michigan-csga", 
+                "--crs", "epsg:4326",
+                "--store_file", "True",
+                "--store_path", "E:\\EarthshotStorage\\MichiganAoiGediData\\4aFull"
+            ]
+        }
+    ]
+}
