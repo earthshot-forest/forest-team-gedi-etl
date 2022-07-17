@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS public.gedi_4a_data_complete
     selected_mode_flag_a4 bigint,
     selected_mode_flag_a5 bigint,
     selected_mode_flag_a6 bigint,
-    shot_number integer NOT NULL,
+    shot_number bigint NOT NULL,
     xvar_a1 double precision[],
     xvar_a10 double precision[],
     xvar_a2 double precision[],
