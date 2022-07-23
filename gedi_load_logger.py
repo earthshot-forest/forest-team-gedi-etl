@@ -1,4 +1,4 @@
-class logger:
+class Logger:
     def __init__(self, engine):
         self.engine = engine    
         self.info = 'INFO'
@@ -16,4 +16,5 @@ class logger:
             print(print_message)
         else:
             with self.engine.begin() as connection:
-                pk = connection.exec_driver_sql("INSERT INTO gedi_load_log (log_level, message, exception, filename) VALUES (%s, %s, %s, %s) RETURNING id", [(log_level, message, ex, filename)])
+                pk = connection.exec_driver_sql("INSERT INTO gedi_load_log (log_level, message, exception, filename) VALUES (%s, %s, %s, %s) RETURNING id"
+                , [(log_level, message, ex, filename)])
