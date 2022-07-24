@@ -1,12 +1,10 @@
 # data access operations
+from os import sep
 from sqlalchemy import create_engine
 import yaml
 
 def create_db_engine():
-    db_cred = yaml.safe_load(open('db_cred.yml'))
-    credentials = {'username': db_cred['earthdata_username'],
-                   'password': db_cred['earthdata_password']
-                   }
+    db_cred = yaml.safe_load(open(f'.{sep}Config{sep}db_cred.yml'))
 
     engine = create_engine(f"postgresql://{db_cred['user']}:{db_cred['password']}@{db_cred['host']}:"
         f"{db_cred['port']}/{db_cred['database']}")   
