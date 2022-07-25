@@ -2,6 +2,7 @@
 from os import sep
 from sqlalchemy import create_engine
 import yaml
+from Model.gedi_etl_batch import *
 
 def create_db_engine():
     db_cred = yaml.safe_load(open(f'.{sep}Config{sep}db_cred.yml'))
@@ -10,6 +11,34 @@ def create_db_engine():
         f"{db_cred['port']}/{db_cred['database']}")   
     
     return engine
+
+def get_gedi_etl_batch(batch_id, engine):
+    with engine.connect() as connection:
+        result = connection.execute('''
+                SELECT 
+                    geb.product product
+                    , geb.upper_left_coord || ',' || geb.lower_right_coord bbox
+                    , geb.label dataset_label
+                    , geb.crs crs
+                    , geb.gedi_version version
+                    , geb.do_store_file do_store_file
+                    , geb.store_path store_path
+                    , ARRAY(SELECT gf.download_url FROM gedi_file gf WHERE gf.batch_id = %s AND is_processed = 0) dl_links
+                FROM gedi_etl_batch geb
+                WHERE geb.batch_id = %s
+                LIMIT 1;''', [(batch_id, batch_id)]).fetchone()
+            
+        return Batch(
+                product=result[0]
+                ,bbox=result[1].split(',')
+                ,dataset_label=result[2]
+                ,crs=result[3] or 'epsg:4326'
+                ,do_store_file = result[5] or False
+                ,store_path = result[6]
+                ,version = result[4]
+                ,dl_links= result[7]
+                ,batch_id=batch_id
+            )
 
 def create_gedi_etl_batch(engine, etl_batch):
     with engine.begin() as connection:
