@@ -135,17 +135,16 @@ def get_4a_gedi_download_links(bbox):
     for index, row in l4adf.iterrows():
         urls.append(row['granule_url'])
     
+
     return urls#, l4adf['granule_size'].sum()
 
-def get_gedi_download_links(product, version, bbox):
+def get_1B_2A_2B_download_links(product, version, bbox):
     """Get a list of download links that intersect an AOI from the GEDI Finder web service.
     :param product: The GEDI product. Options - 1B, 2A, 2B, or 4A
     :param version: The GEDI production version. Option - 001
     :param bbox: An area of interest as an array containing the upper left lat, upper left long, lower right lat and lower right long coordinates -
      [ul_lat,ul_lon,lr_lat,lr_lon]
     """
-    if product == 'GEDI04_A':
-        return get_4a_gedi_download_links(bbox)
 
     bboxStr = bbox[0] + ',' + bbox[1] + ',' + bbox[2] + ',' + bbox[3]
     url = 'https://lpdaacsvc.cr.usgs.gov/services/gedifinder?product=' + product + '&version=' + str(
@@ -156,32 +155,13 @@ def get_gedi_download_links(product, version, bbox):
 
     return listh5
 
-
-def write_to_database(gdf, db_cred, schema, table):
-    """
-        Reads raster data from raster file.
-
-        Parameters
-        ----------
-        gdf : GeoDataFrame
-            A geopandas GeoDataFrame.
-        db_cred : dict
-            A dictionary with database connection information
-        schema : str
-            A str representing the schema name in the DB
-        table : str
-            A str representing the table name in the DB
-
-        Returns
-        -------
-        : bool
-            returns true if database write was successful.
-    """
-    engine = create_engine(f"postgresql://{db_cred['user']}:{db_cred['password']}@{db_cred['host']}:{db_cred['port']}/{db_cred['database']}")
-    gdf.to_postgis(name=table, con=engine, if_exists='append')
-
-    return True
-
+def get_download_links(product: str, version: str, bbox: dict) -> dict:
+    download_links_dict = {}
+    if product == 'GEDI04_A':
+        return get_4a_gedi_download_links(bbox)
+    else:
+        download_links_dict[product] = get_1B_2A_2B_download_links(product, version, bbox)
+        return download_links_dict
 
 def get_aoi_x_y_index(data, bbox, lat_column, lon_column, product):
     """
@@ -345,4 +325,3 @@ def remove_or_store_h5_file(file_path, do_store_file, store_path):
         shutil.move(file_path, f'{store_path}{os.sep}{new_file_name}')
     else:
         os.remove(file_path)
-

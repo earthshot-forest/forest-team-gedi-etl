@@ -188,6 +188,7 @@ CREATE TABLE IF NOT EXISTS public.gedi_4a_data_complete
     label text COLLATE pg_catalog."default",
     filename text COLLATE pg_catalog."default" NOT NULL,
     upload_date timestamp without time zone,
+    batch_id int,
     CONSTRAINT gedi_4a_data_complete_pkey PRIMARY KEY (shot_number, filename)
 )
 

@@ -14,7 +14,8 @@ The basic flow of the program:
     - Delete or store raw H5 file. 
 
 # Running the command line tool
-The script take a number of parameters as inputs. 
+The command line tool as two entry points - run_batch.py and rerun_batch.py.
+**run_batch** - builds a brand new batch and takes the following inputs:
 1. products - comma separated list of GEDI products to download and process. Example: '2a, 2b' - type=str, required=True
 2. bbox - comma separated bounding box as upper_left_lat, upper_left_lon, lower_right_lat, lower_right_lon. 
 Example: 45.02, -111.09, 44.13, -110.00 represents an AOI covering Yellowstone National Park - type=str, required=True
@@ -23,7 +24,6 @@ Example: 45.02, -111.09, 44.13, -110.00 represents an AOI covering Yellowstone N
 5. store_file - A bool indicating storage of the raw H5 file - type=bool, required=False
 6. store_path - The file system location to store the raw H5 file - type=str, required=False
 
-# In progress:
-- Integrate Rabbit MQ, so the downloads and process steps happen asynchronously.
-- Explore adding an API layer 
-- Explore running this in a container or include an anaconda environment in the repo to avoid dependancy issues.
+**rerun_batch** provides a way to continue processing a batch that was stopped midway through processing. It will query the gedi_file table fby batch_id for download urls that have an is_processed status of 0 and only process these files. This is useful especially when running large batches and restarting the batch from the beginning is inconvenient. 
+ rerun_batch takes the following inputs:
+ 1. batch_id - gedi_etl_batch.batch_id
