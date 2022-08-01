@@ -1,6 +1,7 @@
 -- Table: public.gedi_load_log
 
 -- DROP TABLE public.gedi_load_log;
+CREATE SEQUENCE gedi_load_log_id_seq;
 
 CREATE TABLE IF NOT EXISTS public.gedi_load_log
 (
