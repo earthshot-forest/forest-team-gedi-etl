@@ -1,6 +1,7 @@
 -- Table: public.gedi_etl_batch
 
 -- DROP TABLE public.gedi_etl_batch;
+CREATE SEQUENCE gedi_etl_batch_batch_id_seq;
 
 CREATE TABLE IF NOT EXISTS public.gedi_etl_batch
 (
