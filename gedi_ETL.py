@@ -7,6 +7,7 @@ from DAL.data_access import *
 from Config.gedi_dataset_config import config_manager
 from geoalchemy2 import Geometry, WKTElement
 from datetime import datetime
+import geopandas as gpd
 import requests
 from sqlalchemy.dialects import postgresql
 import sqlalchemy
@@ -41,12 +42,16 @@ def gedi_dataset_ETL(etl_batch, dl_url, filename, connection):
         for k in parsed_gedi_data.keys():
             target_beam = parsed_gedi_data[k]
             target_beam.set_crs(etl_batch.crs, inplace=True)
+            
+            if etl_batch.aoi_gdf is not None:
+                target_beam = gpd.clip(parsed_gedi_data[k], etl_batch.aoi_gdf)
+
             target_beam = target_beam.astype({'shot_number': int})
             target_beam['label'] = etl_batch.dataset_label
             target_beam['filename'] = filename
             target_beam['upload_date'] = datetime.now()
             target_beam['batch_id'] = etl_batch.batch_id
-            table_name = 'gedi_4a_data_complete'     
+            table_name = etl_batch.table_name 
 
             # in order to use to_sql and run inside of a postgres transaction instead of to_postgis, which cannot run inside of a transaction,
             # we have to do this geometry song and dance. See https://gis.stackexchange.com/questions/239198/adding-geopandas-dataframe-to-postgis-table 

@@ -11,13 +11,13 @@ def main():
 
     try:
         parser = argparse.ArgumentParser()
+        # Take either a bounding box or a path to a shapefile defining a polygon aoi. 
+        # Either way, we will need to define a bounding box to get the files from the EarthData web service.
         bbox_group = parser.add_mutually_exclusive_group(required=True)
         bbox_group.add_argument('--bbox', type=str)
         bbox_group.add_argument('--aoi_path', type=str)
 
         parser.add_argument('--product', type=str, required=True)
-
-        # parser.add_argument('--bbox', type=str, required=True)
         parser.add_argument('--label', type=str, required=True)
         parser.add_argument('--crs', type=str, required=False)
         parser.add_argument('--store_file', type=bool, required=False)
@@ -26,10 +26,11 @@ def main():
         args = parser.parse_args()
 
         if args.aoi_path is not None:
-            df = geopandas.read_file(args.aoi_path)
-            bbox = [str(df.bounds.maxy[0]), str(df.bounds.minx[0]), str(df.bounds.miny[0]), str(df.bounds.maxx[0])]
+            aoi_gdf = geopandas.read_file(args.aoi_path)
+            bbox = [str(aoi_gdf.bounds.maxy[0]), str(aoi_gdf.bounds.minx[0]), str(aoi_gdf.bounds.miny[0]), str(aoi_gdf.bounds.maxx[0])]
         else:
             bbox=args.bbox.split(',')
+            aoi_gdf=None
 
         #create a batch object to load into the gedi_etl_batch table
         etl_batch = Batch(
@@ -40,6 +41,8 @@ def main():
             ,do_store_file = args.store_file or False
             ,store_path = args.store_path
             ,version = '001'
+            ,table_name = 'gedi_4a_data_complete' #this should be set based on the product, but we (I) haven't been good at naming tables consistently, so keeping it hardcoded.
+            ,aoi_gdf=aoi_gdf
         )
 
     except Exception as e:
