@@ -18,6 +18,7 @@ def main():
         bbox_group.add_argument('--aoi_path', type=str)
 
         parser.add_argument('--product', type=str, required=True)
+        parser.add_argument('--version', type=int, required=True)
         parser.add_argument('--label', type=str, required=True)
         parser.add_argument('--crs', type=str, required=False)
         parser.add_argument('--store_file', type=bool, required=False)
@@ -40,7 +41,7 @@ def main():
             ,crs=args.crs or 'epsg:4326'
             ,do_store_file = args.store_file or False
             ,store_path = args.store_path
-            ,version = '001'
+            ,version = '00' + str(args.version)
             ,table_name = 'gedi_4a_data_complete' #this should be set based on the product, but we (I) haven't been good at naming tables consistently, so keeping it hardcoded.
             ,aoi_gdf=aoi_gdf
         )
@@ -66,8 +67,6 @@ def main():
     
     try:
         for dl_url in etl_batch.dl_links:
-            if dl_url == 'bound': #for some reason, the last url is 'bound'
-                continue
             #insert files to the gedi_file table to keep track of which ones have been processed.
             insert_gedi_file(engine, dl_url, etl_batch.product, etl_batch.batch_id) #there has to be a better way to batch load these...
     except Exception as e:

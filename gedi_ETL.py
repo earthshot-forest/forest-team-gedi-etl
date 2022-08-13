@@ -66,9 +66,6 @@ def gedi_dataset_ETL(etl_batch, dl_url, filename, connection):
 
 def process_batch(etl_batch, load_logger, engine):
     for dl_url in etl_batch.dl_links:
-        if dl_url == 'bound': #for some reason, the last url is 'bound'
-            continue
-
         process_attempts = 1
 
         while(process_attempts <= 3): #try to process the file up to 3 times if aS connection error occurs
