@@ -189,7 +189,7 @@ def parse_gedi_data(gedi_data, column_subset, excluded_columns, bbox, lat_column
             
     return parsed_data, array_list
 
-def load_gedi_data(credentials: dict, dl_url: str) -> h5py:
+def load_gedi_data(dl_url: str) -> h5py:
     with tempfile.NamedTemporaryFile() as temp:
         # temp.write('defaults')
         fileNameh5 = re.search("GEDI\d{2}_\D_.*", dl_url).group(0).replace(".h5", "")

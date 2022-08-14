@@ -15,13 +15,8 @@ import yaml
 
 def gedi_dataset_ETL(etl_batch, dl_url, filename, connection):
     product = etl_batch.product[-3:]
-    db_cred = yaml.safe_load(open(f'.{sep}Config{sep}db_cred.yml'))
-    credentials = {'username': db_cred['earthdata_username'],
-                   'password': db_cred['earthdata_password']
-                   }
-
     table_name = f'gedi_{product[0]}{product[2]}_data' #This is kind of ugly, but we have our tables named gedi_4a_data, not gedi_4_a_data
-    gedi_data, temp_file = load_gedi_data(credentials, dl_url)
+    gedi_data, temp_file = load_gedi_data(dl_url)
 
     # ***** transform *****
     config = config_manager()

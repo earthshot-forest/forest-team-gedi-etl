@@ -38,6 +38,7 @@ def get_gedi_etl_batch(batch_id, engine):
                 ,version = result[4]
                 ,dl_links= result[7]
                 ,batch_id=batch_id
+                ,table_name = 'gedi_2b_data' #this should be set based on the product, but we (I) haven't been good at naming tables consistently, so keeping it hardcoded.
             )
 
 def create_gedi_etl_batch(engine, etl_batch):
