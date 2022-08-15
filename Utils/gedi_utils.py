@@ -71,7 +71,7 @@ def get_aoi_x_y_index(data, bbox, lat_column, lon_column, product):
         spatial_index: list
             list of index values that are inside the bounding box.
     """
-    if product != '4_A': 
+    if product not in ('4_A','2_A'): 
         lat = np.array(data['geolocation'][lat_column][()])
         lon = np.array(data['geolocation'][lon_column][()])
     else: #4a data has the lat and long layers one level higher than the other products.
